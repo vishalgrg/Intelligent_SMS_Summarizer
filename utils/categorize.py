@@ -1,12 +1,20 @@
 import pickle
-from utils.preprocess import clean_sms
+import os
 
 # Load model and vectorizer
-model = pickle.load(open('model/classifier.pkl', 'rb'))
-vectorizer = pickle.load(open('model/vectorizer.pkl', 'rb'))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_DIR = os.path.join(BASE_DIR, "model")
+
+with open(os.path.join(MODEL_DIR, "classifier.pkl"), "rb") as f:
+    model = pickle.load(f)
+
+with open(os.path.join(MODEL_DIR, "vectorizer.pkl"), "rb") as f:
+    vectorizer = pickle.load(f)
 
 def categorize_sms_list(sms_list):
-    cleaned = [clean_sms(s) for s in sms_list]
-    X = vectorizer.transform(cleaned)
-    preds = model.predict(X)
-    return preds.tolist()
+    """
+    Returns a list of predicted categories for given SMS list
+    """
+    cleaned_sms = [sms.lower() for sms in sms_list]
+    X_vect = vectorizer.transform(cleaned_sms)
+    return model.predict(X_vect)

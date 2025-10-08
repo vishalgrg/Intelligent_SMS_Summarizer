@@ -7,15 +7,28 @@ import datetime
 
 app = Flask(__name__)
 
-# Load full dataset
+# -----------------------------
+# Load dataset
+# -----------------------------
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "sms_dataset.csv")
 df = pd.read_csv(DATA_PATH)
 all_sms = df['message'].tolist()
 
+# -----------------------------
+# Category color mapping
+# -----------------------------
+CATEGORY_COLORS = {
+    "Recharge Offers": "#FFB347",
+    "Banking & Finance": "#77DD77",
+    "Travel Deals": "#89CFF0",
+    "E-commerce": "#FFD700",
+    "Entertainment": "#FF6961",
+}
+
+# -----------------------------
+# Generate digest function
+# -----------------------------
 def generate_daily_digest(sms_list, filter_category=None, search_keyword=None):
-    """
-    Generate daily digest with optional filter and search.
-    """
     # Apply search filter
     if search_keyword:
         sms_list = [sms for sms in sms_list if search_keyword.lower() in sms.lower()]
@@ -48,9 +61,12 @@ def generate_daily_digest(sms_list, filter_category=None, search_keyword=None):
 
     return digest
 
+# -----------------------------
+# Dashboard route
+# -----------------------------
 @app.route("/", methods=["GET", "POST"])
 def dashboard():
-    sms_list = all_sms  # default full dataset
+    sms_list = all_sms
     filter_category = None
     search_keyword = None
 
@@ -62,11 +78,12 @@ def dashboard():
             sms_list = [line.strip() for line in sms_text.split("\n") if line.strip()]
 
     digest = generate_daily_digest(sms_list, filter_category, search_keyword)
-    categories = sorted(list(set(df['category'])))  # for filter dropdown
+    categories = sorted(list(set(df['category'])))
 
     return render_template("dashboard.html", digest=digest, sms_list=sms_list,
                            categories=categories, selected_category=filter_category,
-                           search_keyword=search_keyword)
+                           search_keyword=search_keyword, category_colors=CATEGORY_COLORS)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
