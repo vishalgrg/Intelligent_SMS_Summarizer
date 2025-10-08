@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Intelligent SMS Daily Digest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #124191;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+        }
+        header img {
+            height: 40px;
+            margin-right: 15px;
+        }
+        header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        form textarea {
+            width: 100%;
+            height: 120px;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        input[type=text], select {
+            padding: 7px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #00B3E6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #007EA7;
+        }
+        .category-card {
+            background-color: #e8f0fe;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .category-header {
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #124191;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .category-messages {
+            padding: 10px 15px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .category-messages ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        h2 {
+            color: #124191;
+        }
+        footer {
+            text-align: center;
+            margin: 20px 0;
+            color: #555;
+        }
+        /* Responsive adjustments */
+        @media(max-width:768px){
+            .category-messages { max-height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="https://jiradc2.ext.net.nokia.com/s/-lswisq/9170005/l8pj85/_/jira-logo-scaled.png" alt="Nokia Logo">
+    <h1>Intelligent SMS Daily Digest</h1>
+</header>
+
+<div class="container">
+    <form method="POST">
+        <textarea name="sms_text" placeholder="Paste SMS messages here">{{ "\n".join(sms_list) if sms_list else "" }}</textarea>
+        <br>
+        <input type="text" id="searchInput" placeholder="Search messages...">
+        <select name="filter_category" id="categorySelect">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Generate Digest</button>
+    </form>
+
+    {% if digest %}
+        <h2>Daily Digest for {{ digest.date }}</h2>
+        {% for cat in digest.categories %}
+            <div class="category-card" data-category="{{ cat.category }}">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    {{ cat.category }} ({{ cat.count }}) <span>▼</span>
+                </div>
+                <div class="category-messages">
+                    <ul>
+                        {% for msg in cat.messages %}
+                            <li>{{ msg }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<footer>
+    © {{ digest.date[:4] if digest else '' }} Nokia - Intelligent SMS Digest
+</footer>
+
+<script>
+    // Toggle collapsible category cards
+    function toggleCategory(header){
+        const messages = header.nextElementSibling;
+        messages.style.display = messages.style.display === "block" ? "none" : "block";
+    }
+
+    // Live search filter
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("keyup", function(){
+        const filter = searchInput.value.toLowerCase();
+        document.querySelectorAll(".category-card").forEach(card => {
+            let showCard = false;
+            card.querySelectorAll("li").forEach(li => {
+                if(li.textContent.toLowerCase().includes(filter)){
+                    li.style.display = "";
+                    showCard = true;
+                } else {
+                    li.style.display = "none";
+                }
+            });
+            card.style.display = showCard ? "" : "none";
+        });
+    });
+
+    // Category filter
+    const categorySelect = document.getElementById("categorySelect");
+    categorySelect.addEventListener("change", function(){
+        const selected = this.value;
+        document.querySelectorAll(".category-card").forEach(card => {
+            card.style.display = (selected === "" || card.dataset.category === selected) ? "" : "none";
+        });
+    });
+</script>
+
+</body>
+</html>
