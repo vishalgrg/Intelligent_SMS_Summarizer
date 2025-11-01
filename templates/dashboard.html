@@ -26,7 +26,13 @@
 <body>
 
 <header>
-    <img src="https://jiradc2.ext.net.nokia.com/s/-lswisq/9170005/l8pj85/_/jira-logo-scaled.png" alt="Nokia Logo">
+    <!-- Dual Source Nokia Logo -->
+    <img
+        id="nokiaLogo"
+        src="{{ url_for('static', filename='images/nokia_logo.png') }}"
+        alt="Nokia Logo"
+        onerror="this.onerror=null; this.src='https://jiradc2.ext.net.nokia.com/s/-lswisq/9170005/l8pj85/_/jira-logo-scaled.png';"
+    >
     <h1>Intelligent SMS Daily Digest</h1>
 </header>
 
